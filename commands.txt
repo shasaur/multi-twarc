@@ -1,0 +1,2 @@
+multitwarc hydrate twitter/datasets/1-1k > twitter/datasets/mtwarctest1.jsonl
+python multitwarc-win

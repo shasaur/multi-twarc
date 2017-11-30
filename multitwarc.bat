@@ -1,0 +1,1 @@
+python C:\Users\shasa\Documents\GitHub\multi-twarc\multitwarc-win %*
