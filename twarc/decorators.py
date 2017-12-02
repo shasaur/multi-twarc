@@ -10,19 +10,49 @@ def rate_limit(f):
     """
     def new_f(*args, **kwargs):
         errors = 0
+        #print ("current_token is ", args[0].current_token)
+        
         while True:
+        
+            args[0].current_token = -1
+        
+            ## Get the next available token
+            next_available_second = args[0].token_availability[0]
+            now = time.time()
+            for x in range(0, 9):
+                
+                # Keep track of next available time in case they are all taken
+                if args[0].token_availability[x] < next_available_second:
+                    next_available_second = args[0].token_availability[x]
+                
+                # If there exists a token which is now available, take it
+                if now > args[0].token_availability[x]:
+                    args[0].current_token = x
+                    break
+                
+            # If no tokens are available, sleep until the next one is
+            if args[0].current_token == -1:
+                seconds = next_available_second - now + 10
+                logging.warn("All 9 tokens used: sleeping %s secs", seconds)
+                time.sleep(seconds)
+        
+            # Execute the function with the appropriate token
             resp = f(*args, **kwargs)
+            
+            
+            ## Error handling
+            # If done
             if resp.status_code == 200:
                 errors = 0
                 return resp
+                
+            # If reached the request limit
             elif resp.status_code == 429:
-                reset = int(resp.headers['x-rate-limit-reset'])
-                now = time.time()
-                seconds = reset - now + 10
-                if seconds < 1:
-                    seconds = 10
-                logging.warn("rate limit exceeded: sleeping %s secs", seconds)
-                time.sleep(seconds)
+            
+                # Get the absolute second when rate limit resets and set it as the next available time for the token
+                args[0].token_availability[args[0].current_token] = int(resp.headers['x-rate-limit-reset'])
+                
+            # If some other error
             elif resp.status_code >= 500:
                 errors += 1
                 if errors > 30:

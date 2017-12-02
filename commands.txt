@@ -1,2 +1,7 @@
 multitwarc hydrate twitter/datasets/1-1k > twitter/datasets/mtwarctest1.jsonl
+multitwarc hydrate twitter/ids/1-1k > twitter/tweets/mtwarctest1.jsonl
 python multitwarc-win
+
+/home/user/twitter/multi-twarc/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/opt/puppetlabs/bin
+
+PATH="/home/user/twitter/multi-twarc/:$PATH"

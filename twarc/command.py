@@ -9,6 +9,8 @@ import logging
 import argparse
 import fileinput
 
+import time
+
 from twarc import __version__
 from twarc.client import Twarc
 from twarc.json2csv import csv, get_headings, get_row
@@ -46,6 +48,9 @@ commands = [
 
 
 def main():
+	#Start timing
+	
+	
     parser = get_argparser()
     args = parser.parse_args()
 

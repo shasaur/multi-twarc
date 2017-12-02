@@ -31,17 +31,26 @@ class Twarc(object):
 
     def __init__(self, consumer_key=None, consumer_secret=None,
                  access_token=None, access_token_secret=None,
-                 connection_errors=0, http_errors=0, config=None,
+                 current_token=0, connection_errors=0, http_errors=0, config=None,
                  profile="main", tweet_mode="extended"):
         """
         Instantiate a Twarc instance. If keys aren't set we'll try to
         discover them in the environment or a supplied profile.
         """
 
-        self.consumer_key = consumer_key
-        self.consumer_secret = consumer_secret
-        self.access_token = access_token
-        self.access_token_secret = access_token_secret
+        self.consumer_key = ["rWrYfBglRNfe6oKhuiWfsVWXP", "PGgc5lbZVz72Ee8JDVkvVvbPl", "JVLlA5xeVl1RGqeUMmXtoJUkm", "z2VAIGyGFoWpnev1iIlo5qyGv", "Jn9GyQcbRiDaSQl9d5bDGDcHc", "zVGFAdXmm5GVg6NhIwuuUvWpy", "crzkfuCPUWDi9l0p3iG1AlhrO", "S5ccg00YORNsehheyj0SSHHoB", "SydkB155MoPSsXyW4sHs7rifJ"]
+                             
+        self.consumer_secret = ["UVtyJ9B551P9cM4CNguCApuVZqWP04gCJapVdS6mlgVK3QStNI", "Nmk68Nfuh0e3H3mJvQuZgmZ7P1nQ0rfGxTfMW0zNeT8Yq38bTt", "e707bZW3zgC30dbHdA1t1jqKQCFOys3BumbXGVLf68f40KtbHZ", "ro7v7dFDU8c164P52sYWa1qZkCdXTFggOfADTExSrdHb35kcnb", "CnTnYdTveQz1xgLslTWj9znkMDFU1JiNSCHYfJ14ZNs11sp1cJ", "piHebnMMVomlGFrVM0JuLX0pb33UD6twOYfN60rffXfVjiVgAH", "QYvRKhHALOjsqtu9C6GMMoeJydC8f5z1YTmVALEkxh8M0CauiT", "tAskDjfURe8zDvhKOfq4Vgx2XODDadjZvznggzsj0H9pnb6kdz", "Eiugvx1Lt7T0j0C8gfN4THHUPRPqy2eisnDniyEk5srDlawF9i"]
+        
+        self.access_token = ["932883905794969600-bKYsVMOuAl5xLlQMK67fNezOA4BJ9Xh", "932883905794969600-OwEzRrGEwzezsiRJIRmftDnTEkxJag8", "932883905794969600-sC9Ex4CXGytV9RuokDQCUggqtXCWNbN", "936704697473302528-saqM0lxgLrce5Ihz8tTWL0D5zlXBstB", "936704697473302528-RCRTxOVwF1VeO7vF9fIXT818G8NBQ46", "936704697473302528-qa50qH9p6wLU2oRG1gudfmDX7rFG0CB", "936710892116422656-t0eAZtTLuHs0WOlJ1fXDnIWze9FzuBh", "936710892116422656-vFdHbKnCO8hyiAIh3JzUVML0ZUBKUvr", "936710892116422656-TptRpUw6Wh63qrI1bxrCbpJGV3Jb8vG"]
+        
+        self.access_token_secret = ["AOy9GLzfPyrDRg6PmAVotSSR2yoCs3FPtCB1mqaOFqGnd", "HYwUWKAfdt9Cz4hAqZOmWczmH1mhMRFSQRUBGjm1dBD7t", "xXvXPpG2YL4ymUrSCPqH9yn4YdVShtMfAUGFoJ7KfYSSf", "yGamghcSk7AlmxrA0ZO4bVa1E7cadVyy7up3myuC2jDe7", "i2pVbSD2MlCttBfgYrN60fyEocmTj45dhXHDqWtveR0z2", "m10QsFprqknCoFjuBs5fC2nTOw54vmDO1gOmQT8fac1fW", "ozR5HqAvlMSz5eEQRAqzt5knN0KhczXGgl0EFu3Dlo7ij", "YjoalnqRUKpDYilMSkXfk6Tk7zRLzw9TtcuuEYBH5D7Sa", "oOKMJn9C0KBNrm8CuBAyoyMqniDNBC5mOpjIozP5DL4wb"]
+        
+        # absolute second a particular token is next available
+        self.token_availability = [0,0,0, 0,0,0, 0,0,0]
+        
+        self.current_token = current_token
+        
         self.connection_errors = connection_errors
         self.http_errors = http_errors
         self.profile = profile
@@ -53,8 +62,6 @@ class Twarc(object):
             self.config = config
         else:
             self.config = self.default_config()
-
-        self.check_keys()
 
     def search(self, q, max_id=None, since_id=None, lang=None,
                result_type='recent', geocode=None):
@@ -590,8 +597,8 @@ class Twarc(object):
         Sets up the HTTP session to talk to Twitter. If one is active it is
         closed and another one is opened.
         """
-        if not (self.consumer_key and self.consumer_secret and self.access_token
-                and self.access_token_secret):
+        if not (self.consumer_key[self.current_token] and self.consumer_secret[self.current_token] 
+                and self.access_token[self.current_token] and self.access_token_secret[self.current_token]):
             raise MissingKeys()
 
         if self.client:
@@ -603,36 +610,11 @@ class Twarc(object):
         logging.info("creating http session")
 
         self.client = OAuth1Session(
-            client_key=self.consumer_key,
-            client_secret=self.consumer_secret,
-            resource_owner_key=self.access_token,
-            resource_owner_secret=self.access_token_secret
+            client_key=self.consumer_key[self.current_token],
+            client_secret=self.consumer_secret[self.current_token],
+            resource_owner_key=self.access_token[self.current_token],
+            resource_owner_secret=self.access_token_secret[self.current_token]
         )
-
-    def check_keys(self):
-        """
-        Get the Twitter API keys. Order of precedence is command line,
-        environment, config file. Return True if all the keys were found
-        and False if not.
-        """
-        env = os.environ.get
-        if not self.consumer_key:
-            self.consumer_key = env('CONSUMER_KEY')
-        if not self.consumer_secret:
-            self.consumer_secret = env('CONSUMER_SECRET')
-        if not self.access_token:
-            self.access_token = env('ACCESS_TOKEN')
-        if not self.access_token_secret:
-            self.access_token_secret = env('ACCESS_TOKEN_SECRET')
-
-        if self.config and not (self.consumer_key and
-                                self.consumer_secret and
-                                self.access_token and
-                                self.access_token_secret):
-            self.load_config()
-
-        return self.consumer_key and self.consumer_secret and \
-               self.access_token and self.access_token_secret
 
     def load_config(self):
         path = self.config
@@ -645,41 +627,10 @@ class Twarc(object):
         config = configparser.ConfigParser()
         config.read(self.config)
         data = {}
-        for key in ['access_token', 'access_token_secret',
-                    'consumer_key', 'consumer_secret']:
-            try:
-                setattr(self, key, config.get(profile, key))
-            except configparser.NoSectionError:
-                sys.exit("no such profile %s in %s" % (profile, path))
-            except configparser.NoOptionError:
-                sys.exit("missing %s from profile %s in %s" % (
-                         key, profile, path))
+        
+        #no loading key from config
+        
         return data
-
-    def save_config(self):
-        if not self.config:
-            return
-        config = configparser.ConfigParser()
-        config.add_section(self.profile)
-        config.set(self.profile, 'consumer_key', self.consumer_key)
-        config.set(self.profile, 'consumer_secret', self.consumer_secret)
-        config.set(self.profile, 'access_token', self.access_token)
-        config.set(self.profile, 'access_token_secret',
-                   self.access_token_secret)
-        with open(self.config, 'w') as config_file:
-            config.write(config_file)
-
-    def input_keys(self):
-        print("\nPlease enter Twitter authentication credentials.\n")
-
-        def i(name):
-            return get_input(name.replace('_', ' ') + ": ")
-
-        self.consumer_key = i('consumer_key')
-        self.consumer_secret = i('consumer_secret')
-        self.access_token = i('access_token')
-        self.access_token_secret = i('access_token_secret')
-        self.save_config()
 
     def default_config(self):
         return os.path.join(os.path.expanduser("~"), ".twarc")
