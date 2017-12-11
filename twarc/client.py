@@ -32,7 +32,7 @@ class Twarc(object):
     def __init__(self, consumer_key=None, consumer_secret=None,
                  access_token=None, access_token_secret=None,
                  current_token=0, connection_errors=0, http_errors=0, config=None,
-                 profile="main", tweet_mode="extended"):
+                 profile="main", tweet_mode="extended", token_set=-1):
         """
         Instantiate a Twarc instance. If keys aren't set we'll try to
         discover them in the environment or a supplied profile.
@@ -62,6 +62,8 @@ class Twarc(object):
             self.config = config
         else:
             self.config = self.default_config()
+        
+        self.arg_keys = token_set
 
     def search(self, q, max_id=None, since_id=None, lang=None,
                result_type='recent', geocode=None):
@@ -597,8 +599,8 @@ class Twarc(object):
         Sets up the HTTP session to talk to Twitter. If one is active it is
         closed and another one is opened.
         """
-        if not (self.consumer_key[self.current_token] and self.consumer_secret[self.current_token] 
-                and self.access_token[self.current_token] and self.access_token_secret[self.current_token]):
+        if not (self.consumer_key[self.arg_keys] and self.consumer_secret[self.arg_keys] 
+                and self.access_token[self.arg_keys] and self.access_token_secret[self.arg_keys]):
             raise MissingKeys()
 
         if self.client:
@@ -610,10 +612,10 @@ class Twarc(object):
         logging.info("creating http session")
 
         self.client = OAuth1Session(
-            client_key=self.consumer_key[self.current_token],
-            client_secret=self.consumer_secret[self.current_token],
-            resource_owner_key=self.access_token[self.current_token],
-            resource_owner_secret=self.access_token_secret[self.current_token]
+            client_key=self.consumer_key[self.arg_keys],
+            client_secret=self.consumer_secret[self.arg_keys],
+            resource_owner_key=self.access_token[self.arg_keys],
+            resource_owner_secret=self.access_token_secret[self.arg_keys]
         )
 
     def load_config(self):

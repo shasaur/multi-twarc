@@ -46,11 +46,27 @@ commands = [
     'version',
 ]
 
+token_indexes = [
+    '0',
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    '10',
+    '11',
+    '12'
+]
+
 
 def main():
-	#Start timing
-	
-	
+    #Start timing
+    
+    
     parser = get_argparser()
     args = parser.parse_args()
 
@@ -83,7 +99,8 @@ def main():
         http_errors=args.http_errors,
         config=args.config,
         profile=args.profile,
-        tweet_mode=args.tweet_mode
+        tweet_mode=args.tweet_mode,
+        token_set=args.token_set
     )
 
     # calls that return tweets
@@ -266,6 +283,7 @@ def get_argparser():
     parser = argparse.ArgumentParser("twarc")
     parser.add_argument('command', choices=commands)
     parser.add_argument('query', nargs='?', default=None)
+    parser.add_argument('token_set', choices=token_indexes)
     parser.add_argument("--log", dest="log",
                         default="twarc.log", help="log file")
     parser.add_argument("--consumer_key",
