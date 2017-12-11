@@ -97,6 +97,12 @@ def catch_timeout(f):
     A decorator to handle read timeouts from Twitter.
     """
     def new_f(self, *args, **kwargs):
+        print(self.arg_keys)
+        print(self.consumer_key[self.arg_keys])
+        print(self.consumer_secret[self.arg_keys])
+        print(self.access_token[self.arg_keys])
+        print(self.access_token_secret[self.arg_keys])
+    
         try:
             return f(self, *args, **kwargs)
         except requests.exceptions.ReadTimeout as e:
